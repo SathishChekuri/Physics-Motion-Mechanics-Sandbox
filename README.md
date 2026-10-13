@@ -1,36 +1,185 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Physics Motion Mechanics Sandbox
 
-## Getting Started
+An interactive educational physics laboratory and simulation platform where students can experiment with 2D projectile mechanics, visualize physical trajectories with vector overlays, compare experiments, generate print-ready laboratory reports, and receive step-by-step AI-powered explanations.
 
-First, run the development server:
+---
+
+## 🌟 Key Features
+
+1. **Deterministic Physics Engine**
+   - **Ideal Projectile Motion**: Closed-form analytical kinematic solutions calculating horizontal velocity ($v_x$), vertical velocity ($v_y(t)$), landing time ($t_{land}$), maximum apex elevation ($H_{max}$), and total horizontal range ($R$).
+   - **Aerodynamic Fluid Resistance**: 4th-Order Runge-Kutta (RK4) numerical differential solver modeling quadratic air drag ($F_d = \frac{1}{2} \rho C_d A v^2$).
+   - **Edge-Case Handled**: Full physical stability for ground-level launches ($h_0 = 0$), elevated sea-cliff drops ($h_0 > 0$), pure vertical rockets ($\theta = 90^\circ$), horizontal pitches ($\theta = 0^\circ$), and zero launch velocities.
+   - **Planetary Presets**: Instant physical scenarios for Earth, Moon ($1.62 \text{ m/s}^2$), Mars ($3.72 \text{ m/s}^2$), high cliffs, and high drag.
+
+2. **Real-Time Visualizer & Kinematic Graphs**
+   - **High-DPI HTML Canvas**: Dynamic coordinate auto-scaling, launch platform/cliff, real-time velocity vector arrows, trajectory arc glow, and landing impact animations.
+   - **Telemetry Dashboard**: Live time ($t$), instant position ($x(t), y(t)$), instant velocity ($v_x(t), v_y(t)$), and velocity magnitude ($|v(t)|$).
+   - **Interactive Charts (Recharts)**: Trajectory curve ($y$ vs $x$), Position vs Time ($x(t), y(t)$), and Velocity vs Time ($v_x(t), v_y(t), |v(t)|$).
+
+3. **Experiment Repository & Side-by-Side Comparison**
+   - Save experiments with titles, notes, parameters, and calculated results.
+   - Search, filter by motion model (Ideal Vacuum vs Quadratic Drag), and sort by date, range, or velocity.
+   - Select multiple experiments for cross-examination with superimposed trajectory curves on a unified plot.
+   - Full CRUD operations with deletion confirmation.
+
+4. **AI Physics Laboratory Tutor (Google Gemini 2.5)**
+   - Server-side route handlers (`/api/ai/tutor` and `/api/ai/summary`) using the official `@google/genai` SDK.
+   - Features: Concept explanations, step-by-step mathematical derivations, calculated results interpretation, parameter sensitivities, practice exam questions, and problem-solving hints.
+   - Validated server-side using Zod schemas with fallback guidance when credentials are unset.
+
+5. **Publication-Grade Reports & RFC 4180 CSV Export**
+   - Print-ready report layout (`@media print`) with governing equations, input tables, results, charts, student observations, and AI executive summaries.
+   - CSV export for single or batch experiments with proper quotation escaping and timestamped filenames.
+
+6. **Visible 5-Milestone Progress Checklist**
+   - Visible project milestone component tracking the 5 phases: Architecture, Frontend UI, Supabase Persistence, AI Model Integration, and Vercel Deployment.
+
+---
+
+## 🛠️ Mandatory Technology Stack
+
+- **Framework**: Next.js 16 (App Router) with TypeScript
+- **Styling**: Tailwind CSS
+- **Charts**: Recharts
+- **Simulation**: HTML Canvas
+- **Database & Auth**: Supabase PostgreSQL with Row Level Security (RLS)
+- **AI Integration**: Google Gemini API via `@google/genai`
+- **Validation**: Zod
+- **Testing**: Vitest
+- **Deployment Target**: Vercel
+
+---
+
+## 🚀 Getting Started
+
+### 1. Prerequisites
+
+- **Node.js**: `v20+` or `v24+` (tested on Node 24.17.0)
+- **npm**: `v10+` or `v12+`
+
+### 2. Installation
+
+Clone repository and install dependencies:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <your-repository-url>
+cd prj
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Environment Configuration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Copy the example configuration file:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+cp .env.example .env.local
+```
 
-## Learn More
+Populate the required credentials in `.env.local`:
 
-To learn more about Next.js, take a look at the following resources:
+```env
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-publishable-key
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Google Gemini API
+GEMINI_API_KEY=your-gemini-api-key
+GEMINI_MODEL=gemini-2.5-flash
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+> **Note on Offline/Demo Mode**: If environment variables are not yet provided, the application runs in **Interactive Demo Mode** with full physics calculation, canvas animation, sample experiments, and CSV export operational.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🗄️ Supabase Database Setup
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Create a project at [supabase.com](https://supabase.com).
+2. Open the **SQL Editor** in the Supabase Dashboard.
+3. Copy and run the entire SQL script from [`supabase/schema.sql`](./supabase/schema.sql):
+   - Creates `public.profiles` table linked to `auth.users`.
+   - Creates `public.experiments` table with JSONB columns for parameters and results.
+   - Configures database indexes for fast query filtering.
+   - Enables Row-Level Security (RLS) policies so authenticated users access only their own experiments.
+   - Adds auto-update timestamps and trigger for new user profile initialization.
+4. Go to **Project Settings -> API** and copy the **Project URL** and **Anon public key** into your `.env.local` or Vercel Environment Variables.
+
+---
+
+## 🤖 Google Gemini API Setup
+
+1. Obtain a free API key from [Google AI Studio](https://aistudio.google.com/).
+2. Assign the key to `GEMINI_API_KEY` in `.env.local`.
+3. The API route `/api/ai/tutor` will automatically initialize `@google/genai` and provide instant physics tutoring.
+
+---
+
+## 🧪 Testing & Verification
+
+Run the test suite powered by Vitest:
+
+```bash
+# Run unit tests
+npm test
+
+# Run ESLint code checks
+npm run lint
+
+# Run optimized production build
+npm run build
+```
+
+### Unit Test Coverage
+- **Ideal Projectile Motion**: Range, max height, flight time, and conservation of energy.
+- **Elevated Cliff Launch**: Horizontal and angle launches with non-zero initial heights.
+- **Pure Vertical Launch**: Zero range, 2x apex time, maximum vertical altitude.
+- **Zero Velocity Edge Case**: Vertical fall and ground drop handling.
+- **RK4 Air Resistance**: Mathematical validation that air resistance strictly reduces range and apex altitude compared to vacuum.
+- **RFC 4180 CSV Export**: Comma, quotation, and multiline escaping.
+- **Zod Schemas**: Strict validation of parameters and AI tutor request payloads.
+
+---
+
+## ☁️ Deploying to Vercel
+
+### Option 1: Deploy via Vercel Dashboard (Recommended)
+
+1. Push your code to GitHub / GitLab / Bitbucket.
+2. Sign in to [Vercel](https://vercel.com) and click **"Add New Project"**.
+3. Import your repository.
+4. In **Environment Variables**, add:
+   - `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase Project URL.
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase Anon Key.
+   - `GEMINI_API_KEY`: Your Google AI Studio API Key.
+   - `GEMINI_MODEL`: `gemini-2.5-flash` (optional).
+5. Click **"Deploy"**.
+
+### Option 2: Deploy via Vercel CLI
+
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Authenticate & deploy
+vercel login
+vercel
+
+# Deploy to production
+vercel --prod
+```
+
+---
+
+## 📋 Build Milestones Checklist
+
+- [x] **Milestone 1**: Understand requirements & architecture (Deterministic SI kinematics, RLS schema, official Gemini SDK).
+- [x] **Milestone 2**: Set up Next.js and Tailwind frontend UI (App Router, Canvas visualizer, Recharts kinematic plots).
+- [x] **Milestone 3**: Connect Supabase database persistence (`supabase/schema.sql`, client/server utilities, RLS security).
+- [x] **Milestone 4**: Include AI model for automated generation (Gemini 2.5 server-side API routes, Zod validation, tutoring features).
+- [ ] **Milestone 5**: Deploy application to Vercel (Production build verified, ready for user credential entry and Vercel import).
+
+---
+
+## 📄 License
+
+MIT License. Designed for STEM education and physics motion research.

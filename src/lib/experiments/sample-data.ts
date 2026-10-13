@@ -1,0 +1,101 @@
+import { Experiment } from '@/types/physics';
+import { calculatePhysics } from '@/lib/physics/calculator';
+
+export const SAMPLE_EXPERIMENTS: Experiment[] = [
+  {
+    id: 'demo-exp-1',
+    name: 'Optimal 45° Vacuum Launch (Earth)',
+    motion_type: 'ideal',
+    parameters: {
+      initialVelocity: 25,
+      launchAngle: 45,
+      gravity: 9.81,
+      initialHeight: 0,
+      airResistanceEnabled: false,
+    },
+    results: calculatePhysics({
+      initialVelocity: 25,
+      launchAngle: 45,
+      gravity: 9.81,
+      initialHeight: 0,
+      airResistanceEnabled: false,
+    }),
+    notes: 'Reference baseline: verifies maximum range achieved at 45 degrees in vacuum.',
+    created_at: new Date(Date.now() - 3600000 * 24 * 3).toISOString(),
+  },
+  {
+    id: 'demo-exp-2',
+    name: 'Cliff Launch with Elevation (30° at 35m)',
+    motion_type: 'ideal',
+    parameters: {
+      initialVelocity: 20,
+      launchAngle: 30,
+      gravity: 9.81,
+      initialHeight: 35,
+      airResistanceEnabled: false,
+    },
+    results: calculatePhysics({
+      initialVelocity: 20,
+      launchAngle: 30,
+      gravity: 9.81,
+      initialHeight: 35,
+      airResistanceEnabled: false,
+    }),
+    notes: 'Demonstrates elevated launch dynamics where flight time is prolonged due to initial potential energy.',
+    created_at: new Date(Date.now() - 3600000 * 24 * 2).toISOString(),
+  },
+  {
+    id: 'demo-exp-3',
+    name: 'Lunar Gravity Trajectory (Moon 1.62 m/s²)',
+    motion_type: 'ideal',
+    parameters: {
+      initialVelocity: 20,
+      launchAngle: 45,
+      gravity: 1.62,
+      initialHeight: 0,
+      airResistanceEnabled: false,
+    },
+    results: calculatePhysics({
+      initialVelocity: 20,
+      launchAngle: 45,
+      gravity: 1.62,
+      initialHeight: 0,
+      airResistanceEnabled: false,
+    }),
+    notes: 'Extreme range and apex due to 1/6th gravitational deceleration.',
+    created_at: new Date(Date.now() - 3600000 * 24).toISOString(),
+  },
+  {
+    id: 'demo-exp-4',
+    name: 'Quadratic Atmospheric Drag (Sphere Cd=0.47)',
+    motion_type: 'air_resistance',
+    parameters: {
+      initialVelocity: 40,
+      launchAngle: 45,
+      gravity: 9.81,
+      initialHeight: 0,
+      airResistanceEnabled: true,
+      airParams: {
+        dragCoefficient: 0.47,
+        mass: 0.5,
+        crossSectionalArea: 0.00785,
+        airDensity: 1.225,
+      },
+    },
+    results: calculatePhysics({
+      initialVelocity: 40,
+      launchAngle: 45,
+      gravity: 9.81,
+      initialHeight: 0,
+      airResistanceEnabled: true,
+      airParams: {
+        dragCoefficient: 0.47,
+        mass: 0.5,
+        crossSectionalArea: 0.00785,
+        airDensity: 1.225,
+      },
+    }),
+    notes: 'RK4 air drag model shows asymmetric trajectory and sharp descent angle near impact.',
+    created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+  },
+];
